@@ -1,15 +1,23 @@
-if !FileExist("Rdp-display-modify.res"){
-FileAppend,, Rdp-display-modify.res
-FileSetAttrib, ^H, Rdp-display-modify.res
-}
+;if !FileExist("Rdp-display-modify.res"){
+;FileAppend,, Rdp-display-modify.res
+;FileSetAttrib, ^H, Rdp-display-modify.res
+RegWrite, REG_SZ, HKEY_CURRENT_USER\Software\Display_Switch\Current_Value, Current_Value, 0
+;}
+loop{
 
-Loop, Read, Rdp-display-modify.res
-{
-   total_lines = %A_Index%
-}
+Process, Exist, remoting_desktop.exe
+;msgbox, %ErrorLevel%
+
+if(ErrorLevel > 0){
+
+;Loop, Read, Rdp-display-modify.res
+;{
+;   total_lines = %A_Index%
+;}
 ;msgbox, %total_lines%
 
-FileReadLine, TF, Rdp-display-modify.res, %total_lines%
+RegRead, TF, HKEY_CURRENT_USER\Software\Display_Switch\Current_Value, Current_Value
+;FileReadLine, TF, Rdp-display-modify.res, %total_lines%
 ;msgbox, %TF%
 
 if (TF = 1){
@@ -21,8 +29,12 @@ run(0)
 }
 
 fileAppend(tf) {
-FileAppend % tf "`n", Rdp-display-modify.res
+;FileAppend % tf "`n", Rdp-display-modify.res
+RegAppend(tf)
+}
 
+RegAppend(tf) {
+RegWrite, REG_SZ, HKEY_CURRENT_USER\Software\Display_Switch\Current_Value, Current_Value, %tf%
 }
 
 run(command){
@@ -31,4 +43,7 @@ run, %comspec% /c %windir%\System32\DisplaySwitch.exe /internal,,hide
 } else if (command = 0) {
 run, %comspec% /c %windir%\System32\DisplaySwitch.exe /extend,,hide
 }
+}
+}
+sleep 750
 }
